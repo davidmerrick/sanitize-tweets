@@ -32,7 +32,10 @@ function sanitizeTweets() {
         filterArray.push(!(tweetText[0] === "\"" && tweetText.indexOf("--" != -1))); // filter out quotations
         filterArray.push(!(tweetText[0] === "“" && tweetText.indexOf("--" != -1))); // filter out quotations
         filterArray.push(tweetText.match("-- [A-Za-z]+ [A-Za-z]+$") === null); // filter out quotations
+        filterArray.push(tweetText.match("^\"") === null); // filter out quotations
+        filterArray.push(tweetText.match("^\'") === null); // filter out quotations
         filterArray.push(tweetText.toLowerCase().match("[^A-Za-z]?tune in[^A-Za-z]") === null); // "tune in"
+        filterArray.push(!(tweetText.match("(http|https|ftp):\/\/[\w?=&.\/-;#~%-]+(?![\w\s?&.\/;#~%\"=-]*>)") !== null && tweetText.length < 100)); // filter out just sharing links
         filterArray.push(!tweetText.toLowerCase().endsWith("the art of the deal"));
         filterArray.push(!tweetText.toLowerCase().endsWith("midas touch"));
         filterArray.push(!tweetText.toLowerCase().startsWith("rt "));
@@ -40,12 +43,20 @@ function sanitizeTweets() {
         filterArray.push(!tweetText.toLowerCase().startsWith("check out "));
         filterArray.push(!tweetText.toLowerCase().startsWith("my interview "));
         filterArray.push(!tweetText.toLowerCase().startsWith("i'll be on "));
+        filterArray.push(!tweetText.toLowerCase().startsWith("join me "));
+        filterArray.push(!tweetText.toLowerCase().startsWith("join us "));
+        filterArray.push(!tweetText.toLowerCase().startsWith("weekly address"));
         filterArray.push(!tweetText.toLowerCase().startsWith("will be on "));
         filterArray.push(!tweetText.toLowerCase().startsWith("entrepreneurs:"));
         filterArray.push(!tweetText.toLowerCase().startsWith("i will be on "));
         filterArray.push(!tweetText.toLowerCase().startsWith("from donald trump: "));
         filterArray.push(!tweetText.toLowerCase().startsWith("donald trump appear"));
+        filterArray.push(!tweetText.toLowerCase().startsWith("will be interviewed"));
+        filterArray.push(!tweetText.toLowerCase().startsWith("i will be interviewed"));
         filterArray.push(!(tweetText.toLowerCase().indexOf("my new book") != -1));
+        filterArray.push(!(tweetText.toLowerCase().indexOf("my appearance") != -1));
+        filterArray.push(!(tweetText.toLowerCase().indexOf("watch here") != -1));
+        filterArray.push(!(tweetText.toLowerCase().indexOf("must read") != -1));
         filterArray.push(!(tweetText.toLowerCase().indexOf("premiere") != -1));
         filterArray.push(!(tweetText.toLowerCase().indexOf("finale") != -1));
         filterArray.push(!(tweetText.toLowerCase().indexOf(" will be on ") != -1));
@@ -56,14 +67,18 @@ function sanitizeTweets() {
         filterArray.push(!(tweetText.toLowerCase().indexOf("interview") != -1 && tweetText.toLowerCase().indexOf("discussing") != -1));
         filterArray.push(!(tweetText.toLowerCase().indexOf("int.") != -1 && tweetText.toLowerCase().indexOf("discussing") != -1));
         filterArray.push(!(tweetText.toLowerCase().indexOf("winston churchill") != -1));
+        filterArray.push(!(tweetText.toLowerCase().indexOf("video:") != -1));
+        filterArray.push(!(tweetText.toLowerCase().indexOf("apprentice") != -1 && tweetText.toLowerCase().indexOf("episode") != -1));
         filterArray.push(!(tweetText.toLowerCase().indexOf("thank you") != -1 && tweetText.toLowerCase().indexOf("#supertuesday") != -1));
         return !filterArray.includes(false);
     });
 
     // Decode HTML entities, strip out links
     tweets = tweets.map(tweet => {
+        tweet.text = tweet.text.replace('/\r?\n|\r/g', ' ');
         tweet.text = Entities.XmlEntities.decode(tweet.text);
         tweet.text = tweet.text.replace(/((http|https|ftp):\/\/[\w?=&.\/-;#~%-]+(?![\w\s?&.\/;#~%"=-]*>))/g, '');
+        tweet.text = tweet.text.trim();
         return tweet;
     });
 
