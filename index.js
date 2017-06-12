@@ -22,15 +22,34 @@ function sanitizeTweets() {
         return console.error(e);
     }
 
-    // Decode HTML entities
-    tweets = tweets.map(tweet => {
-        tweet.text = Entities.XmlEntities.decode(tweet.text);
-        return tweet;
+    // Filter data
+    tweets = tweets.filter(item => {
+        let filterArray = [];
+        let tweetText = item.text;
+        filterArray.push(item.is_retweet === false);
+        filterArray.push(!(tweetText[0] === "@" && tweetText.length < 50)); // filter out replies to other Twitter accounts
+        filterArray.push(!(tweetText.startsWith(".@") && tweetText.length < 50)); // filter out replies to other Twitter accounts
+        filterArray.push(!(tweetText[0] === "\"" && tweetText.indexOf("--" != -1))); // filter out quotations
+        filterArray.push(!(tweetText[0] === "“" && tweetText.indexOf("--" != -1))); // filter out quotations
+        filterArray.push(!tweetText.toLowerCase().endsWith("the art of the deal"));
+        filterArray.push(!tweetText.toLowerCase().endsWith("midas touch"));
+        filterArray.push(!tweetText.toLowerCase().startsWith("rt "));
+        filterArray.push(!tweetText.toLowerCase().startsWith("check out "));
+        filterArray.push(!tweetText.toLowerCase().startsWith("my interview "));
+        filterArray.push(!tweetText.toLowerCase().startsWith("from donald trump: "));
+        filterArray.push(!tweetText.toLowerCase().startsWith("donald trump appear"));
+        filterArray.push(!(tweetText.toLowerCase().indexOf("my new book") != -1));
+        filterArray.push(!(tweetText.toLowerCase().indexOf("albert einstein") != -1));
+        filterArray.push(!(tweetText.toLowerCase().indexOf("winston churchill") != -1));
+        filterArray.push(!(tweetText.toLowerCase().indexOf("thank you") != -1 && tweetText.toLowerCase().indexOf("#supertuesday") != -1));
+        return !filterArray.includes(false);
     });
 
-    // Filter data
-    tweets.filter(item => {
-        return item.is_retweet === false;
+    // Decode HTML entities, strip out links
+    tweets = tweets.map(tweet => {
+        tweet.text = Entities.XmlEntities.decode(tweet.text);
+        tweet.text = tweet.text.replace(/((http|https|ftp):\/\/[\w?=&.\/-;#~%-]+(?![\w\s?&.\/;#~%"=-]*>))/g, '');
+        return tweet;
     });
 
     tweets.forEach(item => {
